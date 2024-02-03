@@ -1,25 +1,29 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 /**
  * The main class which will start all the subsystems.
- * Responsible for initializing and starting threads.
+ * Responsible for initializing and starting the three threads and the shared boxes.
  * @author Ilyes Outaleb (101185290)
- * @version February 03 2024
+ * @version February 03, 2024
  *
  */
 
-
-
 public class Main {
+    /**
+     * The main method which will be used to start the system
+     * 
+     * @param args arguments that be added
+     */
     public static void main(String[] args) {
-        Box boxFtoS = new Box(); // initialize to start values
-        Box boxStoE = new Box(); // initialize to start values
-
+        /* The boxes will be shared between floor and scheduler (FtoS) and scheduler and elevator (StoE) */
+        Box boxFtoS = new Box();   
+        Box boxStoE = new Box(); 
+        
+        /* The scheduler will have both boxes and the other two subsystem will have one each. Allowing the transfer*/
+        // of data.
         Thread scheduler = new Thread(new Scheduler(boxFtoS, boxStoE), "Scheduler");
-        //Thread scheduler = new Scheduler();
         Thread floor = new Thread(new Floor(boxFtoS), "Floor");
         Thread elevator = new Thread(new Elevator(boxStoE), "Elevator");
-
+        
+        /* Will execute the run() method from runnable and is overwritten in each respective class*/ 
         floor.start();
         scheduler.start();
         elevator.start();
