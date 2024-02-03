@@ -1,3 +1,15 @@
+/**
+ * 
+ * @author Rozba Hakam (101190098)
+ * @author Ilyes Outaleb (101185290)
+ * @version 2024-02-03
+ */
+
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 public class Floor implements Runnable {
 
     private Box sharedBox;
@@ -7,45 +19,55 @@ public class Floor implements Runnable {
         this.sharedBox = box;
     }
 
-
-    public void run() {
-        for (int i = 0; i < 2; i++)
-        {
-            getFromCSV("Message ", i, false, i + 2); //Will extract from CSV and put it into a new attribute call it message;
-
-            getFromSchedulerResponse();
-
-        }
-        //getFromCSV("Message 1"); // get from csv and puts it to the box
-        //putFromFloorToScheduler();
-        //getFromSchedulerResponse();
+    public void run()
+    {
+        readFileAndSendRequests("Requests.txt");
         System.exit(0);
+    }
 
+    public void readFileAndSendRequests(String filename)
+    {
+        try {
+            File requestFile = new File(filename);
+            Scanner scanner = new Scanner(requestFile);
 
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                createBoxFromCSV(line);
+                getFromSchedulerResponse();
+            }
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: " + e.getMessage());
+        }
+    }
+
+    private void createBoxFromCSV(String line)
+    {
+        // Parse the CSV line and create a Box object
+        String[] data = line.split(",");
+        String time = data[0].trim();
+        int floorNumber = Integer.parseInt(data[1].trim());
+        String direction = data[2].trim();
+        int carButtonNumber = Integer.parseInt(data[3].trim());
+        boolean directionUp;
+
+        // ternary Operator to assign the direction up a boolean value
+        directionUp = (direction.equals("Up")) ? true : false;
+
+        getFromCSV(time, floorNumber, directionUp, carButtonNumber);
     }
 
     public void getFromCSV(String time, int floorNumber, boolean directionUp, int carButtonNumber)
     {
         Box temp = new Box(time, floorNumber, directionUp, carButtonNumber);
         sharedBox.getFromSource(temp);
-        //System.out.println("Sendind date to Scheduler");
-        //sharedBox.getFromRecipient(contnent);
-        //System.out.println("Sendind date to Scheduler");
-
     }
-    /*
-    public void putFromFloorToScheduler()
-    {
-        schduler.getFromFloor(this.floorBox.getContent()); // sends a message to scheduler
 
-
-    }
-    */
     public void getFromSchedulerResponse()
-    {   //System.out.println("received response from Scheduler");
+    {
         Box temp = sharedBox.sendToSource();
         temp.printContents();
-        //sharedBox.printContents();
-        //System.out.println("received response from Scheduler");
     }
 }
+
