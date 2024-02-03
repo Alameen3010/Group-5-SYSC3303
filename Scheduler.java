@@ -1,47 +1,77 @@
+/**
+ * The Scheduler class is a thread responsible for acting as a communication channel between the floor and the scheduler
+ * It has two boxes shared with all other subsystems.
+ *
+ *
+ * @author Ilyes Outaleb (101185290)
+ * @version February 3, 2023
+ */
+
 public class Scheduler implements Runnable{
 
-    private Box sharedBox;
-    private Box sharedBox2;
+    private Box sharedBoxFloor;
+    private Box sharedBoxElevator;
+
+    /*Buffer is an extra box to save the content in case some information needs to be processed by the elevator for */
+    // future iterations of the project. The same thing was done for the Elevator .
     private Box buffer;
 
+    /**
+     *  Constructor for the scheduler class which required two shared boxes.
+     * @param box Is the box shared with floor
+     * @param box2 Is the second shared box with elevator
+     */
     public Scheduler(Box box, Box box2)
     {
-        this.sharedBox = box;
-        this.sharedBox2 = box2;
+        this.sharedBoxFloor = box;
+        this.sharedBoxElevator = box2;
     }
 
     public void run() {
         while(true){
-
             getFromFloor();
+            /* Processing can be done here before sending to elevator if needed for future iterations */
             sendToElevator();
             getFromElevator();
+            /* Processing can be done here before sending to elevator if needed for future iterations */
             sendToFloor();
         }
     }
 
+    /**
+     *  Once the floor sends a request the scheduler retrieves from the box and assigns to the buffer.
+     *
+     */
     private void getFromFloor()
-    {   //System.out.println("received message from Floor");
-        this.buffer = sharedBox.sendToDestination();
-        //System.out.println("received message from Floor");
+    {
+        this.buffer = sharedBoxFloor.sendToDestination();
     }
 
+    /**
+     * This method sends the message from floor to elevator by assigning the shared box with elevator to the content of
+     * buffer.
+     *
+     */
     private void sendToElevator()
     {
-        sharedBox2.getFromSource(this.buffer);
+        sharedBoxElevator.getFromSource(this.buffer);
     }
-
+    
+    /**
+     *
+     * This method gets the message from elevator through the sharedbox and assigns it to the buffer.
+     */
     private void getFromElevator()
     {
-        this.buffer = sharedBox2.sendToSource();
+        this.buffer = sharedBoxElevator.sendToSource();
     }
 
+    /**
+     *
+     * This method gets sends the final response message of the system from elevator.
+     */
     private void sendToFloor()
-    {   //System.out.println("Sending message to Floor");
-        sharedBox.getFromDestination(this.buffer);
-        //System.out.println("Sending message to Floor");
-
+    {
+        sharedBoxFloor.getFromDestination(this.buffer);
     }
-
-
 }
