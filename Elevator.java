@@ -7,48 +7,27 @@
     public class Elevator implements Runnable {
 
         private Box sharedBox;
-        private int currentFloor;
 
-        public Elevator(Box sharedBox) {
-            this.sharedBox = sharedBox;
-            this.currentFloor = 1; // Assume the elevator starts at floor 1
+        public Elevator(Box box) {
+            this.sharedBox = box;
         }
 
         public void run() {
-            while (true) {
-                get();
-                put();
+            for (int i = 0; i < 2; i++) {
+                receiveFromScheduler();
+                sendToSchedulerResponse();
             }
         }
 
-        public synchronized void get() {
-            while (!sharedBox.getSchedulerStatus()) { // Wait for the scheduler to send a command
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-            }
-            // Retrieve data from the shared box
-            Integer requestedFloor = sharedBox.getFloorNumber();
-            if (requestedFloor != null) {
-                moveToFloor(requestedFloor);
-            }
-            sharedBox.setSchedulerStatus(false); // Reset the status to indicate the command has been processed
-            notifyAll();
+        private void receiveFromScheduler() {
+            // Receives the message from the scheduler to take action,
+            String message = sharedBox.sendToDestination();
+            System.out.println("Elevator received: " + message);
         }
 
-        public synchronized void put() {
-
-            sharedBox.setFloorNumber(currentFloor);
-            sharedBox.setElevatorStatus(true); // Indicate that the Elevator has updated its status
-            notifyAll();
-        }
-
-        private void moveToFloor(int floor) {
-            // Simulate the action of moving to a floor
-            System.out.println("Moving to floor " + floor);
-            this.currentFloor = floor; // Update the current floor
+        private void sendToSchedulerResponse() {
+            // Sends the response back to the scheduler, could be the new floor number or a status
+            String response = "Elevator processed: " + FloorNumber;
+            sharedBox.getFromDestination(response);
         }
     }
