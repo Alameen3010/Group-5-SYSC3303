@@ -1,43 +1,50 @@
 /**
- * @author Al-ameen Alliu, 101159780
- *The thread for the elevator class where data is collected from the scheduler,
- *processed and sent back o the scheduler
+ * Elevator class handles the operations of an elevator as it receives commands from a scheduler.
+ * It runs within its own thread, processing incoming requests and sending responses.
+ *
+ * @author Al-ameen Alliu
+ * 
  */
 public class Elevator implements Runnable {
 
-    private Box sharedBox;
+    private Box sharedBox; // The shared Box for communication
+    private String buffer; // Temporary buffer to store messages
 
-    private Box buffer;
-
+    /**
+     * Constructor for Elevator class.
+     *
+     * @param box The shared Box instance for communication between Scheduler and Elevator.
+     */
     public Elevator(Box box) {
         this.sharedBox = box;
     }
 
+    /**
+     * The main run method that is executed when the elevator thread starts.
+     * It continuously processes requests from the scheduler and sends responses.
+     */
     public void run() {
-        //for (int i = 0; i < 2; i++) {
-        while(true)
-        {   receiveFromScheduler();
+        while(true) {
+            receiveFromScheduler();
             // include process block if needed in future iterations.
             sendToSchedulerResponse();
-
         }
-        //}
     }
 
+    /**
+     * Receives messages from the scheduler. It waits for a message,
+     * processes it, and updates the buffer with the result.
+     */
     private void receiveFromScheduler() {
-        /**
-         * 
-         */
-        // Receives the message from the scheduler to take action,
-        //String message = sharedBox.sendToDestination();
         this.buffer = sharedBox.sendToDestination();
-        //System.out.println("Elevator received: " + message);
+        // Additional processing can be done here
     }
 
+    /**
+     * Sends a response back to the scheduler. This method retrieves the processed data
+     * from the buffer and sends it back to the scheduler.
+     */
     private void sendToSchedulerResponse() {
-        // Sends the response back to the scheduler, could be the new floor number or a status
-        //String response = "Elevator processed: " + FloorNumber;
-
         sharedBox.getFromDestination(this.buffer);
     }
 }
