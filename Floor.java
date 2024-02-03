@@ -42,7 +42,7 @@ public class Floor implements Runnable {
      *
      * @param filename The name of the file containing the requests.
      */
-    public void readFileAndSendRequests(String filename)
+    private void readFileAndSendRequests(String filename)
     {
         try {
             File requestFile = new File(filename);
@@ -88,7 +88,7 @@ public class Floor implements Runnable {
      * @param directionUp The direction of the request (Up = true) or (Down = false).
      * @param carButtonNumber The car button number associated with the request.
      */
-    public void getFromCSV(String time, int floorNumber, boolean directionUp, int carButtonNumber)
+    private void getFromCSV(String time, int floorNumber, boolean directionUp, int carButtonNumber)
     {
         Box temp = new Box(time, floorNumber, directionUp, carButtonNumber);
         sharedBox.getFromSource(temp);
@@ -97,7 +97,7 @@ public class Floor implements Runnable {
     /**
      * gets a Box object from the shared Box and prints its contents.
      */
-    public void getFromSchedulerResponse()
+    private void getFromSchedulerResponse()
     {
         Box temp = sharedBox.sendToSource();
         temp.printContents();
