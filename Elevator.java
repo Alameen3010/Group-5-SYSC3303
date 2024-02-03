@@ -8,7 +8,7 @@
 public class Elevator implements Runnable {
 
     private Box sharedBox; // The shared Box for communication
-    private String buffer; // Temporary buffer to store messages
+    private Box buffer; // Temporary buffer to store messages
 
     /**
      * Constructor for Elevator class.
