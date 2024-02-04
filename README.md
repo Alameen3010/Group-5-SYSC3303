@@ -41,5 +41,8 @@ Elevator.java: Implements the Elevator class, which receives requests from the S
 Main.java: Contains the main method to start the Elevator Control System. This initializes and starts all the threads of the program and sets creates the two shared boxes of this system.
 
 ------------------------------------------------------------------------------------------------------------------------------------------
+Set up instructions:
+Add all files with .java extension (9 total) into a single project folder. Also, add the Requests.txt into this folder. Run the Main to see the output with the given Requests.txt file, you may test the output and see how it differs with changing values in the Requests.txt input file.
 
 Test files instructions:
+All test files (4 total, denoted with 'Test' in file name) should have been placed in same project folder. Each Test class has tests for individual methods of each class, excluding Main. *NOTE, in our testing, the tests ran more smoothly when 'run' button was pressed for individual methods within the test class, and not all at once*
