@@ -47,4 +47,22 @@ public class Elevator implements Runnable {
     private void sendToSchedulerResponse() {
         sharedBox.getFromDestination(this.buffer);
     }
+
+    // *The following methods were added for testing purposes*
+
+    /**
+     * getter for buffer
+     * @return Box, the box object
+     */
+    public Box getBuffer() {
+        return buffer;
+    }
+
+    /**
+     * setter for the box object
+     * @param buffer, Box object
+     */
+    public void setBuffer(Box buffer) {
+        this.buffer = buffer;
+    }
 }
