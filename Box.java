@@ -168,4 +168,45 @@ public class Box {
         notifyAll();
         return temp;
     }
-}
+
+    // *The following methods were added for testing purposes*
+
+    /**
+     * getter for Time
+     * @return String, Time
+     */
+    public String getTime() {
+        return time;
+    }
+
+    /**
+     * getter for Floor Number
+     * @return int, floor number
+     */
+    public int getFloorNumber() {
+        return floorNumber;
+    }
+
+    /**
+     * getter for direction
+     * @return bool, direction of elevator
+     */
+    public boolean isDirectionUp() {
+        return directionUp;
+    }
+
+    /**
+     * getter for button number
+     * @return int, elevator button number
+     */
+    public int getCarButtonNumber() {
+        return carButtonNumber;
+    }
+
+    /**
+     * getter for state
+     * @return int, State
+     */
+    public int getState() {
+        return state;
+    }
