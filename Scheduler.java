@@ -56,7 +56,7 @@ public class Scheduler implements Runnable{
     {
         sharedBoxElevator.getFromSource(this.buffer);
     }
-    
+
     /**
      *
      * This method gets the message from elevator through the sharedbox and assigns it to the buffer.
@@ -70,12 +70,11 @@ public class Scheduler implements Runnable{
      *
      * This method gets sends the final response message of the system from elevator.
      */
-    private void sendToFloor()
-    {
+    private void sendToFloor() {
         sharedBoxFloor.getFromDestination(this.buffer);
-
+    }
+    
     // *The following methods were added for testing purposes*
-
     /**
      * getter for buffer
      * @return Box, the box object
@@ -87,7 +86,7 @@ public class Scheduler implements Runnable{
     /**
      * setter for the box object
      * @param buffer, Box object
-     */
+        */
     public void setBuffer(Box buffer) {
         this.buffer = buffer;
     }
