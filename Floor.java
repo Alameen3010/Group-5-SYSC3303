@@ -64,7 +64,7 @@ public class Floor implements Runnable {
      *
      * @param line The CSV line stores the requested information.
      */
-    private void createBoxFromCSV(String line)
+    void createBoxFromCSV(String line)
     {
         /* Parse the CSV line and create a Box object */
         String[] data = line.split(",");
@@ -97,7 +97,7 @@ public class Floor implements Runnable {
     /**
      * gets a Box object from the shared Box and prints its contents.
      */
-    private void getFromSchedulerResponse()
+    void getFromSchedulerResponse()
     {
         Box temp = sharedBox.sendToSource();
         temp.printContents();
