@@ -210,3 +210,4 @@ public class Box {
     public int getState() {
         return state;
     }
+}
