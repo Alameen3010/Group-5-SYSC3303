@@ -1,5 +1,5 @@
 Group-5-SYSC3303
-Designing and implementing an elevator simulator system
+Adding state machines for scheduler and elevator subsystems, preparing for multi-elevator coordination to maximize passenger throughput in subsequent iterations.
 
 February 17, 2024
 
@@ -7,13 +7,13 @@ SYSC 3303 - Project Group 5 - Iteration 2
 
 Group members and tasks:
 
-Alameen Alliu (101159780): 
+Alameen Alliu (101159780): Elevator Subsystem
 
 Taran Basati (101161332): JUnit Testing
 
 Rozba Hakam (101190098): State Diagram, ReadMe
 
-Ilyes Outaleb (101185290): 
+Ilyes Outaleb (101185290): Scheduler Subsystem
 
 Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
 
