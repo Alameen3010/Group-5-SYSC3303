@@ -18,11 +18,12 @@ Ilyes Outaleb (101185290): Scheduler Subsystem
 Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
 
 Iteration Description:
-
+This iteration focuses on adding state machines for the scheduler and elevator subsystems, assuming a single elevator setup, with plans to optimize passenger throughput through multi-elevator coordination in future iterations.
 
 Files Description:
+Scheduler.java: Manages and schedules requests from the floor subsystem to the elevator subsystem using a state machine.
 
-
+Elevator.java: Represents an elevator subsystem with functionalities for handling elevator operations and door states through a state machine.
 
 Set up instructions: 
 
