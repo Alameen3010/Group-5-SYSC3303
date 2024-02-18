@@ -57,6 +57,12 @@ public class Scheduler {
             case State.SCHEDULING: /* If the machine is in the scheduling state. This will send the request to the elevator subsystem in future iterations. */
                 System.out.println("State: Scheduling");
                 this.state = State.RECEIVING_REQUEST;   /* Once finished returns to the receiving state. */
+
+            /* Default state incase something goes wrong always transistion back to the RECEVING state */
+            default:
+                System.out.println("Unknown state");
+                this.state = State.RECEIVING_REQUEST; 
+                break;
         }
     }
 
