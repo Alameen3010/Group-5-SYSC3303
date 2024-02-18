@@ -4,7 +4,7 @@ import java.util.Scanner;
  * The Scheduler class which will schedule and send the requests from the floor subsystem to the elevator subsystem.
  * The scheduler goes from getting the request to scheduling the requests with many elevator.
  * @author Ilyes Outaleb (101185290)
- * @version February 03, 2024
+ * @version 2024-02-17
  *
  */
 
