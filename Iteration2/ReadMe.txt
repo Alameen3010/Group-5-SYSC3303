@@ -25,8 +25,6 @@ Scheduler.java: Manages and schedules requests from the floor subsystem to the e
 
 Elevator.java: Represents an elevator subsystem with functionalities for handling elevator operations and door states through a state machine.
 
-Set up instructions: 
+Set up instructions: Add all files with .java extension (2 classes + 3 test = 5 total) into a single project folder. Run Elevator.java and Scheduler.java, then simply follow console instrustions to simulate the system.
 
-
-
-Test file instructions:
+Test files instructions: All test files (3 total, denoted with 'Test' in file name) should have been placed in same project folder. Each Test class has tests for the individual methods of each class. Also, multiple tests for different phases of the state diagram are included. An Integration test class was created that combines both Elevator and Scheduler in one test class for a more broad, system wide test.
