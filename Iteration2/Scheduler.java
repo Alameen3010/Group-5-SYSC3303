@@ -1,15 +1,16 @@
-import java.util.Scanner;
-
 /**
- * The Scheduler class which will schedule and send the requests from the floor subsystem to the elevator subsystem.
- * The scheduler goes from getting the request to scheduling the requests with many elevator.
- * @author Ilyes Outaleb (101185290)
- * @version 2024-02-17
+ * The Scheduler class is a thread responsible for acting as a communication channel between the floor and the scheduler
+ * It has two boxes shared with all other subsystems.
  *
+ *
+ * @author Ilyes Outaleb (101185290)
+ * @version February 3, 2024,
+ * Edited: Ilyes Outaleb (101185290)
+ * @version March 02, 2024,
  */
 
+public class Scheduler implements Runnable{
 
-public class Scheduler {
     /* Variable representing all the possible states of the scheduler. */
     private enum State {
         RECEIVING_REQUEST,
@@ -18,81 +19,118 @@ public class Scheduler {
 
     /* Variable representing the state of the scheduler. */
     private State state;
+    private Box sharedBoxFloor;
+    private Box sharedBoxElevator;
 
-    /* Variable simulating whether the scheduler received a request from the floor system
-    *  This is used to exit from the state machine once no more requests are needed from floor subsystem.
-    */
-    private boolean hasRequestFromFloor;
+    /*Buffer is an extra box to save the content in case some information needs to be processed by the elevator for */
+    // future iterations of the project. The same thing was done for the Elevator .
+    private Box buffer;
 
     /**
-     * The constructor for the scheduler class which sets the entry condition to RECEIVING REQUEST.
+     *  Constructor for the scheduler class which required two shared boxes.
+     * @param box Is the box shared with floor
+     * @param box2 Is the second shared box with elevator
      */
-    public Scheduler()
+    public Scheduler(Box box, Box box2)
     {
+        this.sharedBoxFloor = box;
+        this.sharedBoxElevator = box2;
         this.state = State.RECEIVING_REQUEST;
+    }
+
+    public void run() {
+        while(true){
+            getFromFloor();
+            /* Processing can be done here before sending to elevator if needed for future iterations */
+            while(!processFloorRequest());
+            sendToElevator();
+            getFromElevator();
+            /* Processing can be done here before sending to elevator if needed for future iterations */
+            sendToFloor();
+        }
     }
 
     /**
      * Main class responsible for simulating the state machine for the scheduler subsystem. This will transistion from
      * the different states of the machine under the right conditions/events.
      */
-    public void processFloorRequest()
+    public boolean processFloorRequest()
     {
         /* Will enter different case blocks according to the state attribute */
         switch(this.state)
         {
             case State.RECEIVING_REQUEST: /* If the machine is in the entry state it checks if there is a request. Simulated by user input. */
                 System.out.println("State: Receiving_Request");
-                if (processResponse())
-                {
-                    this.state = State.SCHEDULING;          /* If there is than it schedules the request to reduce waiting time */
-                }
-                else                                    /* if no request than it goes back to IDLE and waits for a future request from floor */
-                {   System.out.println("Scheduler going IDLE as no more requests to be processed.");
-                    System.exit(0);
-
-                }
-
+                this.state = State.SCHEDULING;   /* If there is than it schedules the request to reduce waiting time */
+                break;
 
             case State.SCHEDULING: /* If the machine is in the scheduling state. This will send the request to the elevator subsystem in future iterations. */
                 System.out.println("State: Scheduling");
-                this.state = State.RECEIVING_REQUEST;   /* Once finished returns to the receiving state. */
+                this.state = State.RECEIVING_REQUEST;/* Once finished returns to the receiving state. */
+                return true;
 
-            /* Default state incase something goes wrong always transistion back to the RECEVING state */
+            /* Default state in case something goes wrong always transition back to the initial state */
             default:
                 System.out.println("Unknown state");
-                this.state = State.RECEIVING_REQUEST; 
+                this.state = State.RECEIVING_REQUEST ;
                 break;
+
         }
+        return false;
+    }
+
+
+    /**
+     *  Once the floor sends a request the scheduler retrieves from the box and assigns to the buffer.
+     *
+     */
+    private void getFromFloor()
+    {
+        this.buffer = sharedBoxFloor.sendToDestination();
     }
 
     /**
-     *  FUnction responsible for taking the user input.
+     * This method sends the message from floor to elevator by assigning the shared box with elevator to the content of
+     * buffer.
      *
-     * @return Boolean representing the user wants to simulate a floor request or not.
      */
-    public boolean processResponse()
-    {   Scanner myObj = new Scanner(System.in); /* Create a scanner object to read from the terminal */
-        String userInput;
-        System.out.println("Would you like to simulate a floor request? (Options:'Yes'/'No')");
-        userInput = myObj.nextLine();
-        return userInput.equals("Yes"); /* Anything else than "Yes" will be considered as no" */
+    private void sendToElevator()
+    {
+        sharedBoxElevator.getFromSource(this.buffer);
     }
 
     /**
-     * Main function responsible for creating the object and running the state transition method.
      *
-     * @param args Optional arguments
+     * This method gets the message from elevator through the sharedbox and assigns it to the buffer.
      */
-    public static void main(String[] args) {
-        Scheduler scheduler = new Scheduler();
-
-        /* Continuously loop until all floor requests are scheduled. */
-        while (true)
-        {
-            scheduler.processFloorRequest();
-        }
+    private void getFromElevator()
+    {
+        this.buffer = sharedBoxElevator.sendToSource();
     }
 
+    /**
+     *
+     * This method gets sends the final response message of the system from elevator.
+     */
+    private void sendToFloor()
+    {
+        sharedBoxFloor.getFromDestination(this.buffer);
+    }
 
+    // *The following methods were added for testing purposes*
+    /**
+     * getter for buffer
+     * @return Box, the box object
+     */
+    public Box getBuffer() {
+        return buffer;
+    }
+
+    /**
+     * setter for the box object
+     * @param buffer, Box object
+     */
+    public void setBuffer(Box buffer) {
+        this.buffer = buffer;
+    }
 }
