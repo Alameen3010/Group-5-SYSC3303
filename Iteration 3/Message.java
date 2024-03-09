@@ -1,3 +1,9 @@
+/**
+ * @author Ilyes Outaleb (101185290)
+ * @version March 09, 2024
+ * 
+ */
+
 import java.io.Serializable;
 
 public class Message implements Serializable{
