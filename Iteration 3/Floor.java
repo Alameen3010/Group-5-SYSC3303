@@ -2,9 +2,12 @@
  * The Floor class represents a floor in a building and implements the Runnable interface, allowing it to be used
  * as a thread. It reads requests from a csv/txt file, processes them, and communicates with a shared Box object
  * that is shared with scheduler.
- * @author Rozba Hakam (101190098)
+ * @author Al-Ameen Alliu
  * @author Ilyes Outaleb (101185290)
  * @version 2024-02-03
+ * Integrated Iteration 1 and 2
+ * @version 2024-03-09
+ * Integrated UDP
  */
 
 import java.io.*;
@@ -12,6 +15,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Scanner;
+import java.io.IOException;
 
 public class Floor implements Runnable {
 
@@ -20,6 +24,13 @@ public class Floor implements Runnable {
     private InetAddress schedulerAddress;
     private int schedulerPort;
 
+    private DatagramSocket socket;
+
+    private int floorPort = 55000;
+
+    private static final int BUFFER_SIZE = 1024;
+
+    private boolean continueReading = true;
     /**
      * Constructs a FloorSubsystem with the given IP address and port for the SchedulerSubsystem.
      *
@@ -29,6 +40,7 @@ public class Floor implements Runnable {
     public Floor(String schedulerIP, int schedulerPort)
     {
         try {
+            this.socket = new DatagramSocket(floorPort);
             this.schedulerAddress = InetAddress.getByName(schedulerIP);
             this.schedulerPort = schedulerPort;
         } catch (Exception e) {
@@ -45,8 +57,35 @@ public class Floor implements Runnable {
     public void run()
     {   log("FloorSubsystem is starting.");
         readFileAndSendRequests("Requests.txt");
+
         //System.exit(0);
     }
+
+
+
+    private Message receiveUDPMessage() {
+        try {
+            byte[] buffer = new byte[BUFFER_SIZE];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
+            socket.receive(packet);
+
+            ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
+            ObjectInputStream in = new ObjectInputStream(bis);
+            Message message = (Message) in.readObject();
+
+            System.out.println("Received object:");
+            message.printMessage();
+
+
+            return message;
+        } catch (Exception e) {
+            System.err.println("ElevatorSubsystem failed to receive UDP message: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     /**
      * Reads requests from a csv/txt file, processes each line, and interacts with the shared Box.
@@ -60,14 +99,15 @@ public class Floor implements Runnable {
             File requestFile = new File(filename);
             Scanner scanner = new Scanner(requestFile);
             DatagramSocket sendSocket = new DatagramSocket();
-            //while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            log("Read line: " + line);
-            message = createMessageFromCSV(line);
-            sendRequestToScheduler(sendSocket, message);
-                //receiveResponseFromScheduler(sendSocket);
-                //getFromSchedulerResponse();
-            //}
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                log("Read line: " + line);
+                message = createMessageFromCSV(line);
+                sendRequestToScheduler(sendSocket, message);
+                message = receiveUDPMessage();
+                while(message.getConfirmation() == false)
+                {}
+            }
             scanner.close();
             sendSocket.close();
         } catch (FileNotFoundException e) {
@@ -119,7 +159,7 @@ public class Floor implements Runnable {
         /* ternary Operator to assign the direction up a boolean value */
         //directionUp = (direction.equals("Up")) ? true : false;
 
-        Message temp = new Message(time, floorNumber, direction, carButtonNumber);
+        Message temp = new Message(time, floorNumber, direction, carButtonNumber, false);
         return temp;
         //getFromCSV(time, floorNumber, direction, carButtonNumber);
     }
@@ -157,6 +197,13 @@ public class Floor implements Runnable {
         System.out.println("[FloorSubsystem] " + message);
     }
 
+
+    public void closeSocket() {
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
+            log("Socket closed.");
+        }
+    }
     /**
      * The main method to start the FloorSubsystem.
      *
@@ -164,8 +211,18 @@ public class Floor implements Runnable {
      */
     public static void main(String[] args) {
         String schedulerIP = "localhost";
-        int schedulerPort = 5000;
+        int schedulerPort = 50000;
+
         log("Creating instance of FloorSubsystem.");
-        new Thread(new Floor(schedulerIP, schedulerPort)).start();
+
+        Floor floorSubsystem = new Floor(schedulerIP, schedulerPort);
+        new Thread(floorSubsystem).start();
+
+
+        // Register shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            floorSubsystem.closeSocket();
+            log("SchedulerSubsystem shutdown hook executed.");
+        }));
     }
 }
