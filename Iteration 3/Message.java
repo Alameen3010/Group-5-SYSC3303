@@ -5,6 +5,7 @@
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Message implements Serializable{
 
@@ -17,6 +18,8 @@ public class Message implements Serializable{
     private int destination;
 
     private boolean confirmation;
+
+
 
     public Message(String date, int source, String direction, int destination, boolean confirmation)
     {
@@ -83,5 +86,20 @@ public class Message implements Serializable{
         System.out.println("Direction: " + this.direction);
         System.out.println("Destination: " + this.destination);
         System.out.println("Has been read: " + this.confirmation);
+    }
+
+    public void horizontalPrint()
+    {
+        //System.out.println("Message contains the following:");
+        System.out.println(this.date + "," + this.source + "," + this.direction + "," + this.destination);
+
+    }
+
+    public void horizontalPrint(int elevatorNumber)
+    {
+
+        System.out.println(this.date + "," + this.source + "," + this.direction + "," + this.destination + "[Elevator "
+        + elevatorNumber + "]");
+
     }
 }
