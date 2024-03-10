@@ -1,46 +1,24 @@
-/**
- * The Scheduler class is a thread responsible for acting as a communication channel between the floor and the scheduler
- * It has two boxes shared with all other subsystems.
- *
- *
- * @author Ilyes Outaleb (101185290)
- * @version February 3, 2024,
- * Edited: Ilyes Outaleb (101185290)
- * @version March 02, 2024,
- * @versiion March 09, 2024,
- * Integrated UDP
- */
-
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.io.IOException;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 
-public class Scheduler implements Runnable{
+public class Scheduler implements Runnable {
 
-    /* Variable representing all the possible states of the scheduler. */
     private enum State {
         RECEIVING_REQUEST,
         SCHEDULING,
     }
 
-    /* Variable representing the state of the scheduler. */
     private State state;
-
     private DatagramSocket socket;
-
     private InetAddress elevatorAddress;
     private static final int SCHEDULER_PORT = 50000;
     private static final int ELEVATOR_PORT = 60000;
-
     private static final int FLOOR_PORT = 55000;
     private static final int BUFFER_SIZE = 1024;
+    private Queue<Message> requestQueue = new LinkedList<>();
 
-    private Message listOfMessages; //= new Message("2023-02-05", 4, "Up", 6);
-
+    //private Elevator elevator1 = new Elevator("localhost",90000);
 
     public Scheduler() {
         this.state = State.RECEIVING_REQUEST;
@@ -57,134 +35,86 @@ public class Scheduler implements Runnable{
 
     public void run() {
         log("SchedulerSubsystem is running.");
-        while(true) {
-            this.listOfMessages = receiveFloorRequest();
-            while (!processFloorRequest()) ;
-            sendCommandToElevator(this.listOfMessages);
-
-            this.listOfMessages = receiveElevatorResponse();
-
-            sendFloorResponse(this.listOfMessages);
+        while (true) {
+            receiveFloorRequests();
+            processFloorRequests();
         }
-
-
     }
 
-    /**
-     * Main class responsible for simulating the state machine for the scheduler subsystem. This will transistion from
-     * the different states of the machine under the right conditions/events.
-     */
-    public boolean processFloorRequest()
-    {
-        /* Will enter different case blocks according to the state attribute */
-        switch(this.state)
-        {
-            case State.RECEIVING_REQUEST: /* If the machine is in the entry state it checks if there is a request. Simulated by user input. */
-                System.out.println("State: Receiving_Request");
-                this.state = State.SCHEDULING;   /* If there is than it schedules the request to reduce waiting time */
-                break;
-
-            case State.SCHEDULING: /* If the machine is in the scheduling state. This will send the request to the elevator subsystem in future iterations. */
-                System.out.println("State: Scheduling");
-                this.state = State.RECEIVING_REQUEST;/* Once finished returns to the receiving state. */
-                return true;
-
-            /* Default state in case something goes wrong always transition back to the initial state */
-            default:
-                System.out.println("Unknown state");
-                this.state = State.RECEIVING_REQUEST ;
-                break;
-
-        }
-        return false;
-    }
-
-    /**
-     * Waits for and processes incoming requests from the floor subsystem.
-     */
-    private Message receiveFloorRequest() {
+    private void receiveFloorRequests() {
         try {
             byte[] buffer = new byte[BUFFER_SIZE];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
             socket.receive(packet);
-
             ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
             ObjectInputStream in = new ObjectInputStream(bis);
             Message message = (Message) in.readObject();
-
-
-            return message;
+            requestQueue.offer(message);
         } catch (Exception e) {
-            System.err.println("ElevatorSubsystem failed to receive UDP message: " + e.getMessage());
+            System.err.println("SchedulerSubsystem failed to receive UDP message: " + e.getMessage());
             e.printStackTrace();
-            return null;
         }
     }
 
-    /**
-     * Sends a command to the elevator subsystem after processing the floor request.
-     * @param command The command to be sent to the elevator subsystem.
-     */
-    private void sendFloorResponse(Message command) {
+    private void processFloorRequests() {
+        while (!requestQueue.isEmpty()) {
+            Message message = requestQueue.poll();
+            //decideOrderOfRequests(message);
+            sendCommandToElevator(message);
+        }
+    }
+/**
+    private void decideOrderOfRequests(Message message) {
+        int destinationFloor = message.getDestination();
+        String direction = message.getDirection();
+
+        // If the elevator is moving up and the request is in the same direction
+        if (elevator1.getCurrentDirection().equals("UP") && direction.equals("UP")) {
+            if (destinationFloor >= elevator1.getCurrentFloor()) {
+                sendCommandToElevator(message); // Send the command to the elevator immediately
+            } else {
+                // If the request is below the current floor, enqueue it for later processing
+                requestQueue.offer(message);
+            }
+        }
+        // If the elevator is moving down and the request is in the same direction
+        if (elevator1.getCurrentDirection().equals("DOWN") && direction.equals("DOWN")) {
+            if (destinationFloor <= elevator1.getCurrentFloor()) {
+                sendCommandToElevator(message); // Send the command to the elevator immediately
+            } else {
+                // If the request is above the current floor, enqueue it for later processing
+                requestQueue.offer(message);
+            }
+        }
+        // If the elevator is currently stopped, prioritize requests based on current position
+        else if (elevator1.getCurrentDirection().equals("STOP")) {
+            // If the request is at the same floor as the elevator, send the command immediately
+            if (destinationFloor == elevator1.getCurrentFloor()) {
+                sendCommandToElevator(message);
+            } else {
+                // If the request is not at the same floor, enqueue it for later processing
+                requestQueue.offer(message);
+            }
+        }
+        // If the elevator is moving in the opposite direction, enqueue the request for later processing
+        else {
+            requestQueue.offer(message);
+        }
+    }
+*/
+    private void sendCommandToElevator(Message command) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(bos);
             out.writeObject(command);
             out.flush();
             byte[] serializedData = bos.toByteArray();
-
-            DatagramPacket packet = new DatagramPacket(serializedData, serializedData.length, InetAddress.getLocalHost(), FLOOR_PORT);
-            socket.send(packet);
-        } catch (IOException e) {
-            log("Error sending command to elevator: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void sendCommandToElevator(Message command) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream out = new ObjectOutputStream(bos);
-            out.writeObject(listOfMessages);
-            out.flush();
-            byte[] serializedData = bos.toByteArray();
-
             DatagramPacket packet = new DatagramPacket(serializedData, serializedData.length, elevatorAddress, ELEVATOR_PORT);
             socket.send(packet);
             log("Command sent to elevator: " + command);
         } catch (IOException e) {
             log("Error sending command to elevator: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-
-
-
-
-    /**
-     * Receives and processes the response from the elevator subsystem.
-     */
-    private Message receiveElevatorResponse() {
-        try {
-            byte[] buffer = new byte[BUFFER_SIZE];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
-            socket.receive(packet);
-
-            ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
-            ObjectInputStream in = new ObjectInputStream(bis);
-            Message message = (Message) in.readObject();
-
-            System.out.println("Received object:");
-            message.printMessage();
-
-
-            return message;
-        } catch (Exception e) {
-            System.err.println("ElevatorSubsystem failed to receive UDP message: " + e.getMessage());
-            e.printStackTrace();
-            return null;
         }
     }
 
@@ -199,10 +129,6 @@ public class Scheduler implements Runnable{
         }
     }
 
-    /**
-     * The main method that starts the scheduler subsystem thread.
-     * @param args Command line arguments (not used).
-     */
     public static void main(String[] args) {
         Scheduler schedulerSubsystem = new Scheduler();
         log("Starting SchedulerSubsystem thread.");
@@ -212,6 +138,4 @@ public class Scheduler implements Runnable{
             log("SchedulerSubsystem shutdown hook executed.");
         }));
     }
-
 }
-
