@@ -1,23 +1,9 @@
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.io.*;
 import java.net.*;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * Elevator class handles the operations of an elevator as it receives commands from a scheduler.
- * It runs within its own thread, processing incoming requests and sending responses.
- *
- * @author Al-ameen Alliu
- * @version February 03, 2024,
- * Edited: Ilyes Outaleb (101185290)
- * @version March 02, 2024,
- * Integrated it with Iteration 1
- * @version March 09, 2024
- * Integrated UDP
- */
 public class Elevator implements Runnable {
-
     private enum State {
         STOP,
         DOOR_OPENING,
@@ -34,33 +20,23 @@ public class Elevator implements Runnable {
     private int destinationFloor; /* The floor to which the passenger has asked to go */
     private int currentFloor; /* Variable representing on which the elevator is currently on. */
 
-    private int stopFloor; /* Buffer varaible to represent the destination floor of any given path of the state machine */
+    private int stopFloor; /* Buffer variable to represent the destination floor of any given path of the state machine */
     private State state; /* Initial state is stop */
 
     private boolean elevatorHasPassenger; /* Boolean to represent whether the elevator is moving with or without passenger */
 
+    private Set<Integer> completedRequests = new HashSet<>();
     private Message request;
 
-
     private DatagramSocket sendReceiveSocket;
-
     private int schedulerPort = 50000;
     private int listeningPort = 60000;
     private InetAddress schedulerAddress;
     private static final int BUFFER_SIZE = 1024;
 
-    /**
-     * Constructor for Elevator class.
-     *
-     */
     public Elevator(String schedulerIP, int schedulerPort) {
-
-        this.state = State.STOP;
-        this.currentFloor = 0;
-        this.elevatorHasPassenger = false;
-
-
         this.schedulerPort = schedulerPort;
+        this.state = State.STOP; // Initialize the state enum to STOP
         try {
             this.schedulerAddress = InetAddress.getByName(schedulerIP);
             this.sendReceiveSocket = new DatagramSocket(listeningPort);
@@ -71,49 +47,39 @@ public class Elevator implements Runnable {
         }
     }
 
-    /**
-     * The main run method that is executed when the elevator thread starts.
-     * It continuously processes requests from the scheduler and sends responses.
-     */
     public void run() {
-        while(true) {
-
-
+        while (true) {
             receiveFromScheduler();
 
+            if (!completedRequests.contains(request.getDestination())) {
+                this.floorRequested = this.request.getSource();
+                this.destinationFloor = this.request.getDestination();
 
-            this.floorRequested = this.request.getSource(); /* Retrieves the data from the box to be used */
-            this.destinationFloor = this.request.getDestination();
+                System.out.println("The Elevator is starting at floor: " + this.currentFloor);
 
-            System.out.println("The Elevator is starting at floor: " + this.currentFloor);
-
-            /* Continues while the state machine has not finished marked by the arrival of the passenger at destination */
-            while (!processSchedulerRequest()) {
-                /* If the elevator is where the passenger is pressing the floor button */
-                if (this.currentFloor == this.floorRequested) {
-                    /* Then elevator must move to where the passenger wants to debark */
-                    this.stopFloor = this.destinationFloor;
-
-                } else /* if that is not the case */ {   /* then it must move to where the passenger is located first */
-                    this.stopFloor = this.floorRequested;
+                while (!processSchedulerRequest()) {
+                    if (this.currentFloor == this.floorRequested) {
+                        this.stopFloor = this.destinationFloor;
+                    } else {
+                        this.stopFloor = this.floorRequested;
+                    }
                 }
+
+                completedRequests.add(request.getDestination());
+                this.request.setConfirmation(true);
+                sendToSchedulerResponse();
+            } else {
+                System.out.println("Skipping request as it's already completed: " + request.getDestination());
             }
-            ;// only for one elevator change it to multiple by looking at iteration 2 original.
-
-            this.request.setConfirmation(true);
-            sendToSchedulerResponse();
         }
-        //sendReceiveSocket.close();
-
-
     }
 
 
     public boolean processSchedulerRequest() {
 
-        switch (this.state) {
+        switch (state) {
             /* Will start at Stop and will transisient depending if its on the right floor or not */
-            case State.STOP:
+            case STOP:
 
                 System.out.println("State: Stop");
                 System.out.println("Current Floor:" + this.currentFloor);
@@ -130,13 +96,13 @@ public class Elevator implements Runnable {
                 break;
 
             /* This state always transitions to the Doors being opened */
-            case State.DOOR_OPENING:
+            case DOOR_OPENING:
                 System.out.println("State: Door opening");
                 this.state = State.DOOR_OPEN;
                 break;
 
             /* This state is where the elevator has its door opens. Then checks if passenger entered */
-            case State.DOOR_OPEN:
+            case DOOR_OPEN:
                 System.out.println("State: Door open");
 
                 if (this.elevatorHasPassenger)             /* If the elevator has a passenger it must be debarking it */
@@ -148,20 +114,20 @@ public class Elevator implements Runnable {
                 else                                                        /* If not  it must be embarking it */
                 {
                     System.out.println("Passenger has entered at floor " + this.floorRequested
-                        + " and will be moving to floor: " + this.destinationFloor);
+                            + " and will be moving to floor: " + this.destinationFloor);
                     this.elevatorHasPassenger = true;                   /* Now the elevator has a passenger */
                 }
                 this.state = State.DOOR_CLOSING;
                 break;
 
             /* This state always transitions to the Doors being Closed */
-            case State.DOOR_CLOSING:
+            case DOOR_CLOSING:
                 System.out.println("State: Door closing");
                 state = State.DOOR_CLOSED;
                 break;
 
             /* This state checks if an elevator request is in progress or not.*/
-            case State.DOOR_CLOSED:
+            case DOOR_CLOSED:
                 System.out.println("Door closed");
                 if (this.currentFloor != this.destinationFloor) /* If there is an elevator request than it proceeds to move. */
                 {   /* Notify Scheduler that the elevator is being requested by a passenger. Add current floor and destination floor */
@@ -179,19 +145,19 @@ public class Elevator implements Runnable {
 
 
             /* This state always transitions to the Cruising Constant Speed*/
-            case State.ACCELERATING:
+            case ACCELERATING:
                 System.out.println("State: Accelerating");
                 state = State.CRUISING;
                 break;
 
             /* This state always transitions to the Decelerating state*/
-            case State.CRUISING:
+            case CRUISING:
                 System.out.println("State: Cruising");
                 state = State.DECELERATING;
                 break;
 
             /* This state always transitions to the Decelerating state*/
-            case State.DECELERATING:
+            case DECELERATING:
                 System.out.println("State: Decelerating");
                 state = State.STOP;
                 this.currentFloor = this.stopFloor;
@@ -206,13 +172,9 @@ public class Elevator implements Runnable {
         }
         return false;   /* Has not finished the state machine yet. Need to repeat */
     }
-    /**
-     * Receives messages from the scheduler. It waits for a message,
-     * processes it, and updates the buffer with the result.
-     */
-    private void receiveFromScheduler() {
-        this.request = receiveUDPMessage(); // Blocking call, waits for a message
 
+    private void receiveFromScheduler() {
+        this.request = receiveUDPMessage();
     }
 
     private Message receiveUDPMessage() {
@@ -220,17 +182,12 @@ public class Elevator implements Runnable {
             byte[] buffer = new byte[BUFFER_SIZE];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             System.out.println("ElevatorSubsystem ready to receive UDP message on port: " + listeningPort);
-
             sendReceiveSocket.receive(packet);
-
             ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
             ObjectInputStream in = new ObjectInputStream(bis);
             Message message = (Message) in.readObject();
-
             System.out.println("Received object:");
             message.printMessage();
-
-
             return message;
         } catch (Exception e) {
             System.err.println("ElevatorSubsystem failed to receive UDP message: " + e.getMessage());
@@ -239,43 +196,38 @@ public class Elevator implements Runnable {
         }
     }
 
-    /**
-     * Sends a response back to the scheduler. This method retrieves the processed data
-     * from the buffer and sends it back to the scheduler.
-     */
     private void sendToSchedulerResponse() {
         sendUDPMessage(this.request);
     }
 
-    public void sendUDPMessage(Message message) {
+    private void sendUDPMessage(Message message) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(bos);
             out.writeObject(message);
             out.flush();
             byte[] serializedData = bos.toByteArray();
-
             DatagramPacket packet = new DatagramPacket(serializedData, serializedData.length, schedulerAddress, schedulerPort);
             sendReceiveSocket.send(packet);
         } catch (IOException e) {
-            log("Error sending command to elevator: " + e.getMessage());
+            System.err.println("Error sending command to scheduler: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Logs a message to the standard output, prefixed with the class name.
-     * @param message The message to log.
-     */
-    private static void log(String message) {
-        System.out.println("[SchedulerSubsystem] " + message);
     }
 
     public void closeSocket() {
         if (sendReceiveSocket != null && !sendReceiveSocket.isClosed()) {
             sendReceiveSocket.close();
-            log("Socket closed.");
+            System.out.println("Socket closed.");
         }
+    }
+
+    public int getCurrentFloor() {
+        return this.currentFloor;
+    }
+
+    public String getCurrentDirection() {
+        return this.request.getDirection();
     }
 
     public static void main(String[] args) {
@@ -283,19 +235,11 @@ public class Elevator implements Runnable {
         int schedulerPort = 50000;
 
         Elevator elevatorSubsystem = new Elevator(schedulerIP, schedulerPort);
-
-        // Start the ElevatorSubsystem in a new thread
         new Thread(elevatorSubsystem).start();
-        //sendReceiveSocket.close();
 
-        // Register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             elevatorSubsystem.closeSocket();
-            log("SchedulerSubsystem shutdown hook executed.");
+            System.out.println("ElevatorSubsystem shutdown hook executed.");
         }));
     }
-    
-    // *The following methods were added for testing purposes*
-
-
 }
