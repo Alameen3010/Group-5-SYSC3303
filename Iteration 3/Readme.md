@@ -1,14 +1,14 @@
 # Group-5-SYSC3303
 Designing and implementing  an elevator simulator system 
 
-February 3, 2024 
+March 12, 2024 
 
-SYSC 3303 - Project Group 5 - Iteration 1
+SYSC 3303 - Project Group 5 - Iteration 3
 
 ------------------------------------------------------------------------------------------------------
 Group members and tasks:
 
-
+Iteration 1:
 Alameen Alliu (101159780): Elevator Class
 
 Taran Basati (101161332): JUnit Testing
@@ -19,26 +19,49 @@ Ilyes Outaleb (101185290): Main Class, Scheduler Class, Box Class, Floor Class
 
 Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
 
+Iteration 2:
+Alameen Alliu (101159780): Elevator Subsystem
+
+Taran Basati (101161332): JUnit Testing
+
+Rozba Hakam (101190098): State Diagram, ReadMe
+
+Ilyes Outaleb (101185290): Scheduler Subsystem
+
+Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
+
+Iteration 3: 
+Alameen Alliu (101159780): UDP integration
+
+Taran Basati (101161332): JUnit Testing
+
+Rozba Hakam (101190098): Testing and scheduling
+
+Ilyes Outaleb (101185290): Fixed Iteration 2, UDP integration, Modified Floor, Scheduler and Elevator to implement scheduling algorithm, made Request class and Readme.
+
+Ali Zaid (101223823): Pushed requests from Floor to Scheduler
+
 ------------------------------------------------------------------------------------------------------------------------------------------
 
 Iteration Description: 
 
-This project implements an Elevator Control System using Java. It consists of three subsystems: Floor, Scheduler, and Elevator. The Floor subsystem reads events from an input file, sends them to the Scheduler, which then sends to the elevator. The elevator sends the response and the scheduler sends it back to the floor. The Scheduler acts as a server, managing communication between the Floor and Elevator subsystems. The Elevator subsystem receives requests from the Scheduler, processes them, and sends back responses.
+This project implements an first UDP communication effectively translating the threads into processes that can run on seperate computers. In the process,
+the request class was introduced to pass information. Then, all the requests were passed to the scheduler instead effectively processing all requests at once.
+Finally, a "simple" algorithm was implemented that allowed to create as many elevators as requested and allocate an equal amount of requests per elevator.
 
 ------------------------------------------------------------------------------------------------------------------------------------------
 
 Files Description:
 
-Box.java: Defines the Box class, which represents a message flow between subsystems. Its responsible for synchronization using states. 0 being the initial one where the cycle is complete and waiting for a new request. 1 to send the message to the destionation. Then 2 to get the response from the destionation. Finally, 3 to get the response back to the source. This state then goes back to 0 and re-cycles for a new request. This prevents the methods from being run when they are supposed to creating a sonsistent control over the events. Finally, it prints all the steps of the communication process.
+Message.java: Class representing the messages that are sent between the three subsystems. All imformation is obtained through this class.
 
-Scheduler.java: Implements the Scheduler class, responsible for managing communication between the Floor and Elevator subsystems. Contains two boxes and is responsible for sending and getting the message from floor to elevator in both directions.
+Scheduler.java: Implements the Scheduler class, responsible for managing communication between the Floor and Elevator subsystems. Also, responsible for dispatching
+the requests in the most effective way possible.
 
 Floor.java: Implements the Floor class, which reads events from an input csv file and communicates with the Scheduler. It finally prints in the terminal the response
-of the message initially sent. In this iteration the input and output will be the same with a minor modification in the direction attribute.
+of the message initially sent. In this iteration the received message is a null message will all attributes equal to zero.
 
-Elevator.java: Implements the Elevator class, which receives requests from the Scheduler and processes them.
-
-Main.java: Contains the main method to start the Elevator Control System. This initializes and starts all the threads of the program and sets creates the two shared boxes of this system.
+Elevator.java: Implements the Elevator class, which receives requests from the Scheduler and processes them thorugh its Array List.
 
 ------------------------------------------------------------------------------------------------------------------------------------------
 Set up instructions:
