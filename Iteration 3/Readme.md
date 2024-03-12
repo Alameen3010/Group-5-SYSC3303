@@ -19,6 +19,7 @@ Ilyes Outaleb (101185290): Main Class, Scheduler Class, Box Class, Floor Class
 
 Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
 
+------------------------------------------------------------------------------------------------------
 Iteration 2:
 Alameen Alliu (101159780): Elevator Subsystem
 
@@ -30,6 +31,7 @@ Ilyes Outaleb (101185290): Scheduler Subsystem
 
 Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
 
+------------------------------------------------------------------------------------------------------
 Iteration 3: 
 Alameen Alliu (101159780): UDP integration
 
