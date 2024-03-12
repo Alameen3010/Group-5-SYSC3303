@@ -51,6 +51,14 @@ This project implements an first UDP communication effectively translating the t
 the request class was introduced to pass information. Then, all the requests were passed to the scheduler instead effectively processing all requests at once.
 Finally, a "simple" algorithm was implemented that allowed to create as many elevators as requested and allocate an equal amount of requests per elevator.
 
+Add Elevator Steps:
+To change the number of Elevators:
+1) Add an else if statement in the main of elevator with new id.
+2) Change the main for scheduler. Constant???
+3) Add a send "empty" command to elevator // removed implemented by a for loop
+4) Add a receiveElevatorResponse();	  // removed implemented by a for loop
+5) Add a new terminal view matching argument in Elevator Main.
+
 ------------------------------------------------------------------------------------------------------------------------------------------
 
 Files Description:
