@@ -7,6 +7,8 @@
  * @version February 3, 2024,
  * Edited: Ilyes Outaleb (101185290)
  * @version March 02, 2024,
+ * Edited: Ilyes Outaleb (101185290)
+ * @version: March 10, 2024
  */
 
 
@@ -88,12 +90,23 @@ public class Scheduler implements Runnable{
         }
         Message doneMessage = new Message("0", 0, "0", 0, true);
 
-        sendCommandToElevator(doneMessage, ELEVATOR_PORT + 1);
-        sendCommandToElevator(doneMessage, ELEVATOR_PORT + 2);
+        for(int i = 1; i <= this.numberOfElevators; i++)
+        {
+            sendCommandToElevator(doneMessage, ELEVATOR_PORT + i);
 
-        receiveElevatorResponse();
-        receiveElevatorResponse();
+        }
+        //sendCommandToElevator(doneMessage, ELEVATOR_PORT + 1);
+        //sendCommandToElevator(doneMessage, ELEVATOR_PORT + 2);
+        //sendCommandToElevator(doneMessage, ELEVATOR_PORT + 3);
 
+        for(int i = 0; i < this.numberOfElevators; i++)
+        {
+            receiveElevatorResponse();
+
+        }
+        //receiveElevatorResponse();
+        //receiveElevatorResponse();
+        //receiveElevatorResponse();
 
         sendFloorResponse(this.listOfMessages.get(count - 1));
 
@@ -239,7 +252,7 @@ public class Scheduler implements Runnable{
      * @param args Command line arguments (not used).
      */
     public static void main(String[] args) {
-        final int NUMBERELEVATORS = 2; // Can be changed
+        final int NUMBERELEVATORS = 4; // Can be changed
 
 
         Scheduler schedulerSubsystem = new Scheduler(NUMBERELEVATORS);
