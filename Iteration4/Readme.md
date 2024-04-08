@@ -50,7 +50,7 @@ Alameen Alliu (101159780): Diagrams
 
 Taran Basati (101161332): Modified Message, Scheduler and Elevator classes to implement Faults and Timing for States, made Readme.
 
-Ilyes Outaleb (101185290): Modified Sequence Diagram and Implementation of Transient Faults.
+Ilyes Outaleb (101185290): Modified State Diagram and Implementation of Transient Faults.
 
 Rozba Hakam (101190098): Testing
 
