@@ -1,1 +1,83 @@
+# Group-5-SYSC3303
+Designing and implementing  an elevator simulator system 
+
+April 9, 2024 
+
+SYSC 3303 - Project Group 5 - Iteration 5
+
+------------------------------------------------------------------------------------------------------
+Group members and tasks:
+
+Iteration 1:
+Alameen Alliu (101159780): Elevator Class
+
+Taran Basati (101161332): JUnit Testing
+
+Rozba Hakam (101190098): Floor Class 
+
+Ilyes Outaleb (101185290): Main Class, Scheduler Class, Box Class, Floor Class 
+
+Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
+
+------------------------------------------------------------------------------------------------------
+Iteration 2:
+Alameen Alliu (101159780): Elevator Subsystem
+
+Taran Basati (101161332): JUnit Testing
+
+Rozba Hakam (101190098): State Diagram, ReadMe
+
+Ilyes Outaleb (101185290): Scheduler Subsystem, Elevator Subsystem, Sequence Diagram
+
+Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
+
+------------------------------------------------------------------------------------------------------
+Iteration 3: 
+Alameen Alliu (101159780): UDP integration
+
+Taran Basati (101161332): JUnit Testing
+
+Rozba Hakam (101190098): Testing and scheduling
+
+Ilyes Outaleb (101185290): Fixed Iteration 2, UDP integration, Modified Floor, Scheduler and Elevator to implement scheduling algorithm, made Request class and Readme.
+
+Ali Zaid (101223823): Pushed requests from Floor to Scheduler
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Iteration 4: 
+Alameen Alliu (101159780): Diagrams
+
+Taran Basati (101161332): Modified Message, Scheduler and Elevator classes to implement Faults and Timing for States, made Readme.
+
+Ilyes Outaleb (101185290): Modified State Diagram and Implementation of Transient Faults.
+
+Rozba Hakam (101190098): Testing
+
+Ali Zaid (101223823): Testing
+
+------------------------------------------------------------------------------------------------------------------------------------------
+Iteration 5: 
+Alameen Alliu (101159780): User Interface
+
+Taran Basati (101161332): Testing and Measurements
+
+Ilyes Outaleb (101185290): Implemented Capacity and created ElevatorManager.
+
+Rozba Hakam (101190098): Diagrams and Final Report
+
+Ali Zaid (101223823): User Interface
+
+Iteration Description: 
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Files Description:
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+Set up instructions: 
 
