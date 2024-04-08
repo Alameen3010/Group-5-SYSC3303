@@ -27,7 +27,7 @@ Taran Basati (101161332): JUnit Testing
 
 Rozba Hakam (101190098): State Diagram, ReadMe
 
-Ilyes Outaleb (101185290): Scheduler Subsystem, Elevator Subsystem
+Ilyes Outaleb (101185290): Scheduler Subsystem, Elevator Subsystem, Sequence Diagram
 
 Ali Zaid (101223823): UML Class and Sequence Diagram, ReadMe
 
