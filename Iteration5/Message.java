@@ -117,7 +117,7 @@ public class Message implements Serializable{
     {
         //System.out.println("Message contains the following:");
         System.out.println(this.date + "," + this.source + "," + this.direction + "," + this.destination + "," + this.door_fault
-        + "," + this.elevator_fault);
+                + "," + this.elevator_fault);
 
     }
 
@@ -126,6 +126,14 @@ public class Message implements Serializable{
 
         System.out.println(this.date + "," + this.source + "," + this.direction + "," + this.destination + "," + this.door_fault + ","
                 +  this.elevator_fault + "[Elevator " + elevatorNumber + "]");
+
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.date + "," + this.source + "," + this.direction + "," + this.destination + "," + this.door_fault
+                + "," + this.elevator_fault;
 
     }
 }
