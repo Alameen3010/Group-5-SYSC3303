@@ -2,8 +2,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.io.*;
-import java.net.*;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.Math.abs;
 
@@ -62,6 +64,16 @@ public class Elevator implements Runnable {
 
     private static final int size = 5;
 
+    private double startTimerRequest;
+    private double endTimerRequest;
+    private HashMap<Message, Double> timerRequests = new HashMap<Message, Double>();
+    private double startTimerSystem;
+    private double endTimerSystem;
+
+    private int floorCounter;
+    private int totalFloors;
+    private HashMap<Message, Integer> floorsTraversed = new HashMap<Message, Integer>();
+
     /**
      * Constructor for Elevator class.
      *
@@ -72,8 +84,8 @@ public class Elevator implements Runnable {
         this.currentFloor = 0;
         this.elevatorHasPassenger = false;
         this.id = id;
-
-
+        this.totalFloors = 0;
+        this.floorCounter = 0;
         this.schedulerPort = schedulerPort;
         try {
             this.schedulerAddress = InetAddress.getByName(schedulerIP);
@@ -122,7 +134,12 @@ public class Elevator implements Runnable {
         //System.out.println("Count" + count);
         //for(Message currentRequest : this.request)
 
+        this.startTimerSystem = System.currentTimeMillis();
+
         for (int i = 0; i < count; i++) {
+            this.floorCounter = 0;
+            this.startTimerRequest = System.currentTimeMillis();
+
             System.out.println("=========== Executing request: ");
             if (this.request.get(i).getDoor_fault() == 1) {
                 doorBroken = true;
@@ -180,12 +197,17 @@ public class Elevator implements Runnable {
             System.out.println("");// only for one elevator change it to multiple by looking at iteration 2 original.
 
             this.request.get(i).setBuffer(true); /* The buffer in this case is used to tell the elevator that it procesed the request */
-            System.out.println("Finished moving on");
             doorBroken = false;
+            System.out.println("Finished moving on");
+            this.endTimerRequest = System.currentTimeMillis() - startTimerRequest;
+            this.timerRequests.put(request.get(i),(endTimerRequest/1000));
+            this.floorsTraversed.put(request.get(i),(floorCounter));
+            this.totalFloors += floorCounter;
             System.out.println(" ");
         }
 
         System.out.println("Finished list of requests. Now available for new.");
+        this.endTimerSystem = System.currentTimeMillis() - startTimerSystem;
         sendToSchedulerResponse(this.request.get(count-1));
         this.request.get(count-1).horizontalPrint(id);
         //}
@@ -232,8 +254,8 @@ public class Elevator implements Runnable {
                     break;
                 }
 
-            /* This state is where the elevator has its door opens. Then checks if passenger entered */
-            //case State.DOOR_OPEN:
+                /* This state is where the elevator has its door opens. Then checks if passenger entered */
+                //case State.DOOR_OPEN:
             case DOOR_OPEN:
                 System.out.println(" State: Door open ");
                 try {
@@ -250,7 +272,7 @@ public class Elevator implements Runnable {
                 else                                                        /* If not  it must be embarking it */
                 {
                     System.out.print("Passenger has entered at floor " + this.floorRequested
-                        + " and will be moving to floor: " + this.destinationFloor + " -> ");
+                            + " and will be moving to floor: " + this.destinationFloor + " -> ");
                     this.elevatorHasPassenger = true;                   /* Now the elevator has a passenger */
                 }
                 this.state = State.DOOR_CLOSING;
@@ -281,8 +303,8 @@ public class Elevator implements Runnable {
 
 
 
-            /* This state checks if an elevator request is in progress or not.*/
-            //case State.DOOR_CLOSED:
+                /* This state checks if an elevator request is in progress or not.*/
+                //case State.DOOR_CLOSED:
             case DOOR_CLOSED:
                 System.out.print(" Door closed " + " -> ");
                 if (this.currentFloor != this.destinationFloor) /* If there is an elevator request than it proceeds to move. */
@@ -325,6 +347,7 @@ public class Elevator implements Runnable {
                 if (this.direction.equals("Up"))
                 {
                     currentFloor += 1;
+                    floorCounter += 1;
                     try {
                         Thread.sleep(500); // 0.5 s for every floor
                     } catch (InterruptedException e) {
@@ -343,6 +366,7 @@ public class Elevator implements Runnable {
                 else if(this.direction.equals("Down"))
                 {
                     currentFloor -= 1;
+                    floorCounter += 1;
                     try {
                         Thread.sleep(500); // 0.5 s for every floor
                     } catch (InterruptedException e) {
@@ -360,7 +384,7 @@ public class Elevator implements Runnable {
                 }
 
 
-            /* This state always transitions to the Decelerating state*/
+                /* This state always transitions to the Decelerating state*/
             case DECELERATING:
                 System.out.print("State: Decelerating"  + "->");
                 try {
@@ -368,7 +392,7 @@ public class Elevator implements Runnable {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-
+                floorCounter += 1;
                 state = State.STOP;
 
                 this.currentFloor = this.stopFloor;
@@ -455,47 +479,62 @@ public class Elevator implements Runnable {
         }
     }
 
+    public String measurements(){
+        StringBuilder measurement = new StringBuilder();
+        measurement.append("\n\nFull Breakdown for Elevator ").append(this.id).append(":\n");
+        for (Map.Entry<Message,Double> timerRequests: timerRequests.entrySet()) {
+            measurement.append("Request [").append(timerRequests.getKey().toString()).append("] took ")
+                    .append(timerRequests.getValue()).append(" seconds\n");
+        }
+        for (Map.Entry<Message,Integer> floorsTraversed: floorsTraversed.entrySet()) {
+            measurement.append("Request [").append(floorsTraversed.getKey().toString()).append("] traversed through ")
+                    .append(floorsTraversed.getValue()).append(" floors.\n");
+        }
+        measurement.append("In total, Elevator ").append(this.id).append(" took ").append(this.endTimerSystem/1000)
+                .append(" seconds and traversed through ").append(this.totalFloors).append(" floors\n\n");
+        return String.valueOf(measurement);
+    }
+
     public static void main(String[] args) {
         String schedulerIP = "localhost";
         int schedulerPort = 50000;
-        if (args[0].equals("Elevator1"))
-        {
+        if (args[0].equals("Elevator1")) {
             Elevator elevatorSubsystem = new Elevator(schedulerIP, schedulerPort, 1);
             new Thread(elevatorSubsystem).start();
             // Register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                log(elevatorSubsystem.measurements());
                 elevatorSubsystem.closeSocket();
                 log("SchedulerSubsystem shutdown hook executed.");
             }));
-        } else if (args[0].equals("Elevator2"))
-        {
+        } else if (args[0].equals("Elevator2")) {
             Elevator elevatorSubsystem2 = new Elevator(schedulerIP, schedulerPort, 2);
             new Thread(elevatorSubsystem2).start();
             // Register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                log(elevatorSubsystem2.measurements());
                 elevatorSubsystem2.closeSocket();
                 log("SchedulerSubsystem shutdown hook executed.");
             }));
-        } else if (args[0].equals("Elevator3"))
-        {
+        } else if (args[0].equals("Elevator3")) {
             Elevator elevatorSubsystem3 = new Elevator(schedulerIP, schedulerPort, 3);
             new Thread(elevatorSubsystem3).start();
             // Register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                log(elevatorSubsystem3.measurements());
                 elevatorSubsystem3.closeSocket();
                 log("SchedulerSubsystem shutdown hook executed.");
             }));
-        } else if (args[0].equals("Elevator4"))
-        {
+        } else if (args[0].equals("Elevator4")) {
             Elevator elevatorSubsystem4 = new Elevator(schedulerIP, schedulerPort, 4);
             new Thread(elevatorSubsystem4).start();
             // Register shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                log(elevatorSubsystem4.measurements());
                 elevatorSubsystem4.closeSocket();
                 log("SchedulerSubsystem shutdown hook executed.");
             }));
         }
-
     }
 
     public int getCurrentFloor()
