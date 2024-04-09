@@ -4,10 +4,12 @@ import java.awt.*;
 public class ElevatorUserInterface {
     private static JPanel[] elevatorPanels; // Array to store elevator panels
 
+    private static int numberOfElevators = 4; // change this
+
     public static void main(String[] args) {
         String schedulerIP = "localhost"; // or whatever the IP should be
         int schedulerPort = 50000; // or whatever port should be used
-        int numberOfElevators = 4; // if you need to specify the number of elevators
+        //int numberOfElevators = 4; // if you need to specify the number of elevators
 
         ElevatorManager elevatorManager = new ElevatorManager(numberOfElevators, schedulerIP, schedulerPort);
 
@@ -23,11 +25,11 @@ public class ElevatorUserInterface {
         frame.setSize(800, 600); // Adjusted the size to potentially accommodate more information
 
         // Create a main panel with a GridLayout to hold four elevator panels
-        JPanel mainPanel = new JPanel(new GridLayout(1, 4));
+        JPanel mainPanel = new JPanel(new GridLayout(1, numberOfElevators));
 
-        elevatorPanels = new JPanel[4]; // Initialize array to hold elevator panels
+        elevatorPanels = new JPanel[numberOfElevators]; // Initialize array to hold elevator panels
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < numberOfElevators; i++) {
             elevatorPanels[i] = createElevatorPanel("Elevator " + (i + 1), 0, 0, "Normal",0, "Closed"); // Initialize with zero faults and normal status
             mainPanel.add(elevatorPanels[i]);
         }
