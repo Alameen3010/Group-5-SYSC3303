@@ -58,15 +58,15 @@ Ali Zaid (101223823): Testing
 
 ------------------------------------------------------------------------------------------------------------------------------------------
 Iteration 5: 
-Alameen Alliu (101159780): User Interface
+Alameen Alliu (101159780): User Interface, GUI Updater
 
 Taran Basati (101161332): Testing and Measurements
 
-Ilyes Outaleb (101185290): Implemented Capacity and created ElevatorManager.
+Ilyes Outaleb (101185290): Implemented Capacity and created ElevatorManager, provided User Interface values.
 
 Rozba Hakam (101190098): Diagrams and Final Report
 
-Ali Zaid (101223823): User Interface
+Ali Zaid (101223823): User Interface and GUI Updater
 
 Iteration Description: 
 
@@ -78,6 +78,7 @@ Files Description:
 
 
 
+
 ------------------------------------------------------------------------------------------------------------------------------------------
 Set up instructions: 
-
+Scalabiltiy: Change the number of Elevators field in scheduler, elevatorManager and ElevatorUserInterface.
