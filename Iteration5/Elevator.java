@@ -74,6 +74,14 @@ public class Elevator implements Runnable {
     private int totalFloors;
     private HashMap<Message, Integer> floorsTraversed = new HashMap<Message, Integer>();
 
+    private int countPassengers = 0;
+
+    private int numberOfTransientFaults = 0;
+
+    private String systemFaults = "Non-Functional";
+
+    private String doorStatus = "CLOSED";
+
     /**
      * Constructor for Elevator class.
      *
@@ -112,27 +120,26 @@ public class Elevator implements Runnable {
         do {
 
             temp = receiveFromScheduler();
+
             if (temp.getBuffer() == false)
             {
                 temp.horizontalPrint(this.id);
                 this.request.add(temp);
+                this.systemFaults = "Normal";
                 count ++;
+                this.countPassengers ++;
                 /* Message if array can still accept more passengers */
                 Message responseSize = new Message("0",0,"0",0, false, 0, 0);
-                if (count >= size)
+                if (this.countPassengers >= size)
                 {   /* Message if the array is full */
                     responseSize = new Message("0",0,"0",0, true, 0, 0);
                 }
                 sendToSchedulerResponse(responseSize);
-                globalCount ++;
-                System.out.println("Global Count: Elevator " + id + ": " + globalCount);
+                //globalCount ++;
+                //System.out.println("Global Count: Elevator " + id + ": " + globalCount);
                 System.out.println("Sent Size: " + responseSize.getBuffer());
             }
         } while(temp.getBuffer() == false);
-        //System.out.println("================ END ============================");
-
-        //System.out.println("Count" + count);
-        //for(Message currentRequest : this.request)
 
         this.startTimerSystem = System.currentTimeMillis();
 
@@ -214,8 +221,13 @@ public class Elevator implements Runnable {
 
         System.out.println("Finished list of requests. Now available for new.");
         this.endTimerSystem = System.currentTimeMillis() - startTimerSystem;
-        sendToSchedulerResponse(this.request.get(count-1));
-        this.request.get(count-1).horizontalPrint(id);
+        System.out.println(count);
+        if (count > 1)
+        {
+            sendToSchedulerResponse(this.request.get(count-1));
+            this.request.get(count-1).horizontalPrint(id);
+        }
+
         //}
     }
 
@@ -241,8 +253,9 @@ public class Elevator implements Runnable {
             /* This state always transitions to the Doors being opened */
             //case State.DOOR_OPENING:
             case DOOR_OPENING:
+                this.doorStatus = "OPENING";
                 if (doorBroken)
-                {
+                {   this.numberOfTransientFaults ++;
                     System.out.print(" State: Door is opening slower than usual (transient fault) " + " -> ");
                     this.state = State.DOOR_CLOSING;
                     try{
@@ -263,6 +276,7 @@ public class Elevator implements Runnable {
                 /* This state is where the elevator has its door opens. Then checks if passenger entered */
                 //case State.DOOR_OPEN:
             case DOOR_OPEN:
+                this.doorStatus = "OPEN";
                 System.out.println(" State: Door open ");
                 try {
                     Thread.sleep(3000);
@@ -274,6 +288,7 @@ public class Elevator implements Runnable {
                     System.out.print("Passenger has left elevator at floor " + this.destinationFloor
                             + " and Elevator now ready for new scheduler request " +  " -> ");
                     this.elevatorHasPassenger = false;              /* Now the elevator has no longer a passenger */
+                    this.countPassengers --;
                 }
                 else                                                        /* If not  it must be embarking it */
                 {
@@ -287,7 +302,7 @@ public class Elevator implements Runnable {
             /* This state always transitions to the Doors being Closed */
             //case State.DOOR_CLOSING:
             case DOOR_CLOSING:
-
+                this.doorStatus = "CLOSING";
                 if (doorBroken) {
                     System.out.print(" State: Door is closing again due to transisent fault " + " -> ");
 
@@ -312,6 +327,7 @@ public class Elevator implements Runnable {
                 /* This state checks if an elevator request is in progress or not.*/
                 //case State.DOOR_CLOSED:
             case DOOR_CLOSED:
+                this.doorStatus = "CLOSED";
                 System.out.print(" Door closed " + " -> ");
                 if (this.currentFloor != this.destinationFloor) /* If there is an elevator request than it proceeds to move. */
                 {   /* Notify Scheduler that the elevator is being requested by a passenger. Add current floor and destination floor */
@@ -555,18 +571,24 @@ public class Elevator implements Runnable {
 
     // Stub for getting transient faults, assuming you have a way to determine if there are any.
     public int getTransientFaults() {
-        // You need to implement the logic for transient faults
-        // For now, returning a dummy value
-        return 0;
+        return this.numberOfTransientFaults;
     }
 
     // Stub for getting the status of the elevator, assuming you have defined statuses.
     public String getStatus() {
         // You need to implement the logic for status
         // For now, returning a dummy status
-        return "Normal";
+        return this.systemFaults;
+    }
+
+    public int getNumberOfPassengers()
+    {
+        return this.countPassengers;
     }
     // *The following methods were added for testing purposes*
 
-
+    public String getDoorStatus()
+    {
+        return this.doorStatus;
+    }
 }

@@ -10,32 +10,36 @@ public class ElevatorGUIUpdater implements ActionListener {
     public ElevatorGUIUpdater(ElevatorManager elevatorManager, JPanel[] elevatorPanels) {
         this.elevatorManager = elevatorManager;
         this.elevatorPanels = elevatorPanels;
-        // Set up a timer to call actionPerformed every second
         this.timer = new Timer(1000, this);
         timer.start();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // For each elevator, get the latest state and update the UI
         for (int i = 0; i < elevatorPanels.length; i++) {
-            Elevator elevator = elevatorManager.getElevator(i); // This should be i, not i + 1
+            Elevator elevator = elevatorManager.getElevator(i); // Assuming getElevator(i) correctly fetches the elevator instance
             if (elevator != null) {
-                // Here you would retrieve the state from the elevator object
                 int currentFloor = elevator.getCurrentFloor();
                 String direction = elevator.getDirection();
                 int transientFaults = elevator.getTransientFaults();
                 String status = elevator.getStatus();
+                int numPassengers = elevator.getNumberOfPassengers();
+                String doorStatus = elevator.getDoorStatus();
 
-                //
+                // Fetch measurements from the elevator instance
+                String measurements = elevator.measurements(); // Assuming this method exists and returns the formatted measurement data
 
-                // Now, update the UI with the retrieved state
-                final int finalI = i;
+                // Use the index 'i' which is effectively final within this loop block
+                int finalI = i;
+
                 SwingUtilities.invokeLater(() -> {
-                    ElevatorUserInterface.updateElevatorState(finalI, currentFloor, direction, transientFaults, status);
+                    // Update the state information
+                    ElevatorUserInterface.updateElevatorState(finalI, currentFloor, direction, transientFaults, status,numPassengers, doorStatus);
+
+                    // Update the measurement information
+                    ElevatorUserInterface.updateMeasurements(finalI, measurements);
                 });
             }
         }
     }
 }
-
