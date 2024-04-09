@@ -60,7 +60,7 @@ Ali Zaid (101223823): Testing
 Iteration 5: 
 Alameen Alliu (101159780): User Interface, GUI Updater
 
-Taran Basati (101161332): Testing and Measurements
+Taran Basati (101161332): Testing and Measurements, readme.
 
 Ilyes Outaleb (101185290): Implemented Capacity and Scalability and created ElevatorManager, provided User Interface values, readme.
 
@@ -78,14 +78,22 @@ to be created in order to visualize the execution of all previous iterations con
 
 Files Description:
 Elevator.java: Java code that simulates the elevator and is responsible for transporting all the passengers on each floor.
+
 ElevatorGUIUpdater.java: Java code that updates in real time the GUI with elevator values including, number of passengers, current floor, door status, faults and 
 most importantly the metrics showing performance of each elevator.
+
 ElevatorManger.java: Triggers all the elevators, allows for scalability of system and the retrieval of all elevator values.
+
 ElevatorUserInterface.java: The user interface shows all the values made available by the Elevator Manager. It is continuously updated by the ElevatorGUIUpdater.java.
+
 Floor.java: Simulates all the floors and is responsible for providing all the requests to the scheduler for scheduling.
+
 Message.java: Class that is used to communicate between different ports. Serialization and deserialization is used with UDP.
+
 Requests.txt: List of requests which are the input to the system which is read by the floor.
+
 Scheduler.java: Manages all the elevators and provides them their respective requests to handle. Handle system faults.
+
 UI: Base Java code to provide a basic template for the User Interface. Not used in the compilation.
 
 ------------------------------------------------------------------------------------------------------------------------------------------
