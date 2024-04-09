@@ -166,8 +166,12 @@ public class Elevator implements Runnable {
             }
             if (this.currentFloor < this.stopFloor) {
                 this.direction = "Up";
-            } else {
+            } else if (this.currentFloor > this.stopFloor){
+
                 this.direction = "Down";
+            }
+            else {
+                this.direction = "None";
             }
 
             while (!processSchedulerRequest()) {
@@ -182,14 +186,16 @@ public class Elevator implements Runnable {
                         }
 
                         this.stopFloor = this.destinationFloor;
-                        if (this.currentFloor < this.stopFloor)
-                        {
+                        if (this.currentFloor < this.stopFloor) {
                             this.direction = "Up";
-                        }
-                        else
-                        {
+                        } else if (this.currentFloor > this.stopFloor){
+
                             this.direction = "Down";
                         }
+                        else {
+                            this.direction = "None";
+                        }
+
                     }
                 }
 
@@ -540,6 +546,25 @@ public class Elevator implements Runnable {
     public int getCurrentFloor()
     {
         return this.currentFloor;
+    }
+
+    // This method returns the elevator's current direction.
+    public String getDirection() {
+        return this.direction; // Ensure that 'direction' is being updated appropriately in your state machine
+    }
+
+    // Stub for getting transient faults, assuming you have a way to determine if there are any.
+    public int getTransientFaults() {
+        // You need to implement the logic for transient faults
+        // For now, returning a dummy value
+        return 0;
+    }
+
+    // Stub for getting the status of the elevator, assuming you have defined statuses.
+    public String getStatus() {
+        // You need to implement the logic for status
+        // For now, returning a dummy status
+        return "Normal";
     }
     // *The following methods were added for testing purposes*
 

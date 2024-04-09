@@ -1,47 +1,52 @@
+import javax.swing.*;
+
 public class ElevatorManager {
 
-    private static void log(String message) {
-        System.out.println("[FloorSubsystem] " + message);
+    private Elevator[] elevators; // Array to manage Elevator objects
+
+    // Constructor
+    public ElevatorManager(int numberOfElevators, String schedulerIP, int schedulerPort) {
+        elevators = new Elevator[numberOfElevators];
+        for (int i = 0; i < numberOfElevators; i++) {
+            elevators[i] = new Elevator(schedulerIP, schedulerPort, i + 1);
+            new Thread(elevators[i]).start();
+            // Register shutdown hook for each Elevator
+            int finalI = i;
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                elevators[finalI].closeSocket();
+                log("Elevator " + (finalI + 1) + " shutdown hook executed.");
+                log(elevators[finalI].measurements());
+            }));
+        }
     }
 
+    public Elevator getElevator(int index) {
+        if (index >= 0 && index < elevators.length) {
+            return elevators[index];
+        } else {
+            log("Elevator index out of bounds");
+            return null;
+        }
+    }
 
+    private static void log(String message) {
+        System.out.println("[ElevatorManager] " + message);
+    }
+
+    // Main method to start the application
     public static void main(String[] args) {
         String schedulerIP = "localhost";
         int schedulerPort = 50000;
-        Elevator elevatorSubsystem = new Elevator(schedulerIP, schedulerPort, 1);
-        new Thread(elevatorSubsystem).start();
-        // Register shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            elevatorSubsystem.closeSocket();
-            log("SchedulerSubsystem shutdown hook executed.");
-            log(elevatorSubsystem.measurements());
-        }));
+        int numberOfElevators = 4;
 
-        Elevator elevatorSubsystem2 = new Elevator(schedulerIP, schedulerPort, 2);
-        new Thread(elevatorSubsystem2).start();
-        // Register shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            elevatorSubsystem2.closeSocket();
-            log("SchedulerSubsystem shutdown hook executed.");
-            log(elevatorSubsystem2.measurements());
-        }));
+        // Initialize the ElevatorManager with the number of elevators, IP and port
+        ElevatorManager elevatorManager = new ElevatorManager(numberOfElevators, schedulerIP, schedulerPort);
 
-        Elevator elevatorSubsystem3 = new Elevator(schedulerIP, schedulerPort, 3);
-        new Thread(elevatorSubsystem3).start();
-        // Register shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            elevatorSubsystem3.closeSocket();
-            log("SchedulerSubsystem shutdown hook executed.");
-            log(elevatorSubsystem3.measurements());
-        }));
-
-        Elevator elevatorSubsystem4 = new Elevator(schedulerIP, schedulerPort, 4);
-        new Thread(elevatorSubsystem4).start();
-        // Register shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            elevatorSubsystem4.closeSocket();
-            log("SchedulerSubsystem shutdown hook executed.");
-            log(elevatorSubsystem4.measurements());
-        }));
+        // Start the GUI and pass the elevatorManager to it
+        SwingUtilities.invokeLater(() -> {
+            ElevatorUserInterface.createAndShowGUI(elevatorManager);
+        });
     }
+
+
 }
