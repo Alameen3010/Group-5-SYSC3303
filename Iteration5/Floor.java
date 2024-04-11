@@ -4,8 +4,12 @@
  * that is shared with scheduler.
  * @author Ilyes Outaleb (101185290)
  * @version 2024-02-03
+ * Edited: Rozba Hakam
+ * @version 2024-02-03
  * Edited: Ilyes Outaleb (101185290)
  * @version: March 10, 2024
+ * Edited: Taran Basati
+ * @version March 20, 2024
  */
 
 import java.io.*;
@@ -55,8 +59,6 @@ public class Floor implements Runnable {
     public void run()
     {   log("FloorSubsystem is starting.");
         readFileAndSendRequests("Requests.txt");
-
-        //System.exit(0);
     }
 
 
@@ -156,14 +158,12 @@ public class Floor implements Runnable {
         int carButtonNumber = Integer.parseInt(data[3].trim());
         int doorFault = Integer.parseInt(data[4].trim());
         int elevatorFault = Integer.parseInt(data[5].trim());
-        //boolean directionUp;
 
         /* ternary Operator to assign the direction up a boolean value */
         //directionUp = (direction.equals("Up")) ? true : false;
 
         Message temp = new Message(time, floorNumber, direction, carButtonNumber, false, doorFault, elevatorFault );
         return temp;
-        //getFromCSV(time, floorNumber, direction, carButtonNumber);
     }
 
 
