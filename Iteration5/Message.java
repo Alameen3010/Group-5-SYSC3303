@@ -105,7 +105,7 @@ public class Message implements Serializable{
     {
         this.elevator_fault = elevator_fault;
     }
-
+   /* These are different prints for each scenarios */
     public void printMessage()
     {
         System.out.println("Message contains the following:");
