@@ -1,3 +1,10 @@
+/**
+ * Script which will be responsible for providing updates. Will give the real time component to the GUI.
+ *
+ * @author Al-ameen Alliu, Ali Zaid
+ * @version April 7, 2024,
+ */
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
