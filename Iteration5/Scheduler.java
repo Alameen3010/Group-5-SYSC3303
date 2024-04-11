@@ -51,7 +51,7 @@ public class Scheduler implements Runnable{
 
     private List<Integer> brokenElevators = new ArrayList<>(); /* Implements system faults */
 
-    private ArrayList<Integer> fullElevators = new ArrayList<Integer>(); ?* Implements capacity */
+    private ArrayList<Integer> fullElevators = new ArrayList<Integer>(); /* Implements capacity */
     public Scheduler(int numberElevators) {
         this.numberOfElevators = numberElevators;
         this.state = State.RECEIVING_REQUEST;
