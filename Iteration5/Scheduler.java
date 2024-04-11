@@ -9,6 +9,10 @@
  * @version March 02, 2024,
  * Edited: Ilyes Outaleb (101185290)
  * @version: March 10, 2024
+ * Edited Taran Basati
+ * @version March 20, 2024
+ * Edited: Ilyes Outaleb (101185290)
+ * @version April 8 2024
  */
 
 import java.lang.reflect.Array;
@@ -45,9 +49,9 @@ public class Scheduler implements Runnable{
 
     private int numberOfElevators;
 
-    private List<Integer> brokenElevators = new ArrayList<>();
+    private List<Integer> brokenElevators = new ArrayList<>(); /* Implements system faults */
 
-    private ArrayList<Integer> fullElevators = new ArrayList<Integer>();
+    private ArrayList<Integer> fullElevators = new ArrayList<Integer>(); ?* Implements capacity */
     public Scheduler(int numberElevators) {
         this.numberOfElevators = numberElevators;
         this.state = State.RECEIVING_REQUEST;
@@ -67,7 +71,6 @@ public class Scheduler implements Runnable{
         log("SchedulerSubsystem is running.");
         int count = 0;
         int elevatorNumber = 1;
-        //while(true) {
         processFloorRequest();
         System.out.println("================ REQUESTS RECEIVED BY FLOOR ============================");
         Message temp;
@@ -84,7 +87,6 @@ public class Scheduler implements Runnable{
         listOfMessages.remove(listOfMessages.size() - 1); // remove final message
         count --;
         /* Scheduling portion */
-        //System.out.println("Sending Requests to Elevator " + elevatorNumber);
         processFloorRequest();
         for (Message messageSentToElevator : this.listOfMessages) {
             /* Scheduling portion */
@@ -98,12 +100,10 @@ public class Scheduler implements Runnable{
             {
                 elevatorNumber = (elevatorNumber) % (this.numberOfElevators) + 1;
             }
-            while(fullElevators.contains(elevatorNumber))
+            while(fullElevators.contains(elevatorNumber)) /* Skips any full elevator */
             {
                 elevatorNumber = (elevatorNumber) % (this.numberOfElevators) + 1;
             }
-            // source = messageSentToElevator.getSource();
-            // direction = messageSentToElevator.getDirection();
             System.out.println("Sending Requests to Elevator " + elevatorNumber);
             messageSentToElevator.horizontalPrint();
             sendCommandToElevator(messageSentToElevator, ELEVATOR_PORT + elevatorNumber);
@@ -121,27 +121,16 @@ public class Scheduler implements Runnable{
             sendCommandToElevator(doneMessage, ELEVATOR_PORT + i);
 
         }
-        //sendCommandToElevator(doneMessage, ELEVATOR_PORT + 1);
-        //sendCommandToElevator(doneMessage, ELEVATOR_PORT + 2);
-        //sendCommandToElevator(doneMessage, ELEVATOR_PORT + 3);
-
+    
         for(int i = 0; i < this.numberOfElevators; i++)
         {
             receiveElevatorResponse();
             System.out.println("HI1");
         }
-        //receiveElevatorResponse();
-        //receiveElevatorResponse();
-        //receiveElevatorResponse();
+
         System.out.println("HI2");
         sendFloorResponse(this.listOfMessages.get(count - 1));
         fullElevators.clear(); /* Clears all the elevators as they are ready to receive new passengers */
-        //}
-
-
-
-
-
 
     }
 
@@ -187,8 +176,6 @@ public class Scheduler implements Runnable{
             ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
             ObjectInputStream in = new ObjectInputStream(bis);
             Message message = (Message) in.readObject();
-
-
             return message;
         } catch (Exception e) {
             System.err.println("ElevatorSubsystem failed to receive UDP message: " + e.getMessage());
@@ -217,6 +204,12 @@ public class Scheduler implements Runnable{
         }
     }
 
+    /**
+     * Sends a command to the elevator subsystem after processing the floor request.
+     * @param command The command to be sent to the elevator subsystem.
+     * @param port the number of the elevator should be different for each elevator. Serves as an identifier.
+     */
+    
     private void sendCommandToElevator(Message command, int port) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -252,8 +245,6 @@ public class Scheduler implements Runnable{
 
             System.out.println("Received object:");
             message.printMessage();
-
-
             return message;
         } catch (Exception e) {
             System.err.println("ElevatorSubsystem failed to receive UDP message: " + e.getMessage());
@@ -280,12 +271,8 @@ public class Scheduler implements Runnable{
     public static void main(String[] args) {
         final int NUMBERELEVATORS = 4; // Can be changed
 
-
         Scheduler schedulerSubsystem = new Scheduler(NUMBERELEVATORS);
         log("Starting SchedulerSubsystem thread.");
-
-        //Thread elevatorThread = new Thread(new Elevator("localhost", 50000));
-        //elevatorThread.start();
 
         new Thread(schedulerSubsystem).start();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
