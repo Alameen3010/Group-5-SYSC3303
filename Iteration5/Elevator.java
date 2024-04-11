@@ -58,12 +58,13 @@ public class Elevator implements Runnable {
 
     private int id;
 
-    private boolean doorBroken = false;
+    private boolean doorBroken = false; /* Implements the transisent fault */
 
     private String direction;
 
-    private static final int size = 5;
+    private static final int size = 5; /* Implements capacity This could be set to anything */
 
+    /* The following code is used for getting measurements. */
     private double startTimerRequest;
     private double endTimerRequest;
     private HashMap<Message, Double> timerRequests = new HashMap<Message, Double>();
@@ -110,10 +111,8 @@ public class Elevator implements Runnable {
      * It continuously processes requests from the scheduler and sends responses.
      */
     public void run() {
-        //System.out.println("HI");
         int count = 0;
         int globalCount = 0;
-        //while(true) {
 
         //System.out.println("================ REQUESTS IN ELEVATOR " + this.id + "QUEUE ============================");
         Message temp;
@@ -135,8 +134,6 @@ public class Elevator implements Runnable {
                     responseSize = new Message("0",0,"0",0, true, 0, 0);
                 }
                 sendToSchedulerResponse(responseSize);
-                //globalCount ++;
-                //System.out.println("Global Count: Elevator " + id + ": " + globalCount);
                 System.out.println("Sent Size: " + responseSize.getBuffer());
             }
         } while(temp.getBuffer() == false);
@@ -227,15 +224,12 @@ public class Elevator implements Runnable {
             sendToSchedulerResponse(this.request.get(count-1));
             this.request.get(count-1).horizontalPrint(id);
         }
-
-        //}
     }
 
     public boolean processSchedulerRequest() {
 
         switch (this.state) {
             /* Will start at Stop and will transisient depending if its on the right floor or not */
-            //case State.STOP:
             case STOP:
                 System.out.println(" State: Stop ");
                 System.out.print(" Current Floor: " + this.currentFloor + " -> ");
@@ -251,7 +245,6 @@ public class Elevator implements Runnable {
                 break;
 
             /* This state always transitions to the Doors being opened */
-            //case State.DOOR_OPENING:
             case DOOR_OPENING:
                 this.doorStatus = "OPENING";
                 if (doorBroken)
@@ -274,7 +267,7 @@ public class Elevator implements Runnable {
                 }
 
                 /* This state is where the elevator has its door opens. Then checks if passenger entered */
-                //case State.DOOR_OPEN:
+                
             case DOOR_OPEN:
                 this.doorStatus = "OPEN";
                 System.out.println(" State: Door open ");
@@ -300,7 +293,6 @@ public class Elevator implements Runnable {
                 break;
 
             /* This state always transitions to the Doors being Closed */
-            //case State.DOOR_CLOSING:
             case DOOR_CLOSING:
                 this.doorStatus = "CLOSING";
                 if (doorBroken) {
@@ -325,7 +317,6 @@ public class Elevator implements Runnable {
 
 
                 /* This state checks if an elevator request is in progress or not.*/
-                //case State.DOOR_CLOSED:
             case DOOR_CLOSED:
                 this.doorStatus = "CLOSED";
                 System.out.print(" Door closed " + " -> ");
@@ -374,7 +365,7 @@ public class Elevator implements Runnable {
                         Thread.sleep(500); // 0.5 s for every floor
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
-                    } // Change this part
+                    } 
                     System.out.print(" State: Cruising and currently on floor: " + this.currentFloor  + " -> ");
                     if (currentFloor + 1 == this.stopFloor)
                     {
@@ -393,7 +384,7 @@ public class Elevator implements Runnable {
                         Thread.sleep(500); // 0.5 s for every floor
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
-                    } // Change this part
+                    } 
                     System.out.print(" State: Cruising and currently on floor: " + this.currentFloor  + " -> ");
                     if (currentFloor - 1 == this.stopFloor)
                     {
@@ -438,22 +429,19 @@ public class Elevator implements Runnable {
 
     }
 
+    /**
+     * Returns the message received by UDP communication.
+     * Serialization and Deserialization is used as an object is being passed.
+     */
     private Message receiveUDPMessage() {
         try {
             byte[] buffer = new byte[BUFFER_SIZE];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            //System.out.println("ElevatorSubsystem ready to receive UDP message on port: " + listeningPort);
-
             sendReceiveSocket.receive(packet);
 
             ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
             ObjectInputStream in = new ObjectInputStream(bis);
             Message message = (Message) in.readObject();
-
-            //System.out.println("Received object:");
-            //message.printMessage();
-
-
             return message;
         } catch (Exception e) {
             System.err.println("ElevatorSubsystem failed to receive UDP message: " + e.getMessage());
@@ -470,6 +458,10 @@ public class Elevator implements Runnable {
         sendUDPMessage(messageToBeSent);
     }
 
+    /**
+     * Returns the message received by UDP communication.
+     * Serialization and Deserialization is used as an object is being passed.
+     */
     public void sendUDPMessage(Message message) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -501,6 +493,11 @@ public class Elevator implements Runnable {
         }
     }
 
+     /**
+     * The method used to get the measurements used in UI.
+     * @return a String representing all the values measured in the process.
+     */
+    
     public String measurements(){
         StringBuilder measurement = new StringBuilder();
         measurement.append("\n\nFull Breakdown for Elevator ").append(this.id).append(":\n");
@@ -517,6 +514,8 @@ public class Elevator implements Runnable {
         return String.valueOf(measurement);
     }
 
+
+    /* Below is in case the second way to run code is used with seperate terminals */
     public static void main(String[] args) {
         String schedulerIP = "localhost";
         int schedulerPort = 50000;
@@ -569,12 +568,12 @@ public class Elevator implements Runnable {
         return this.direction; // Ensure that 'direction' is being updated appropriately in your state machine
     }
 
-    // Stub for getting transient faults, assuming you have a way to determine if there are any.
+    /* All the following methods are to give access to private fields for the elevator Mangager which will populate the GUI */
     public int getTransientFaults() {
         return this.numberOfTransientFaults;
     }
 
-    // Stub for getting the status of the elevator, assuming you have defined statuses.
+    
     public String getStatus() {
         // You need to implement the logic for status
         // For now, returning a dummy status
@@ -585,7 +584,7 @@ public class Elevator implements Runnable {
     {
         return this.countPassengers;
     }
-    // *The following methods were added for testing purposes*
+    
 
     public String getDoorStatus()
     {
