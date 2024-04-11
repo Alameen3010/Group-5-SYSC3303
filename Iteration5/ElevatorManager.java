@@ -1,3 +1,13 @@
+/**
+ * Script which will be responsible for triggering all the elevator threads. Will provide the GUI the metrics for display.
+ *
+ * @author Ilyes Outaleb (101185290)
+ * @version April 7, 2024,
+ * edited: Alameen Alliu, Ali Zeid
+ * @version April 8, 2024
+ */
+
+
 import javax.swing.*;
 
 public class ElevatorManager {
