@@ -1,3 +1,12 @@
+
+/**
+ * The Graphical user interface.
+ *
+ * @author Al-ameen Alliu, Ali Zaid
+ * @version April 7, 2024,
+ */
+
+
 import javax.swing.*;
 import java.awt.*;
 
